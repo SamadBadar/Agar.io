@@ -4,7 +4,7 @@ import time, random, numpy, math
 root = Tk()
 color = ("red", "blue", "yellow", "green")
 foodList = list()
-
+eList=list()
 
 # code
 def distance(x1, x2, y1, y2):
@@ -80,6 +80,25 @@ class Hero:
 
 
     def collisionDetection(self):
+        for c in range(len(eList)):
+            try:
+                ex = eList[c].coords()[0]
+                ey = eList[c].coords()[1]
+                xxx = self.coords()[0] + self.radius
+                yyy = self.coords()[1] + self.radius
+                xx = ex + 15
+                yy = ey + 15
+
+                if distance(xx, xxx, yy, yyy) <= self.radius:
+                    self.speed*=.9999999999999
+                    player.get_bigger(15)
+                    print("m")
+                    canvas.delete('e' + str(eList[c].ti))
+                    del eList[c]
+                    canvas.update()
+                    root.update()
+            except:
+                pass
         for f in range(len(foodList)):
             try:
                 foodx = foodList[f].getCoords()[0]
@@ -102,15 +121,16 @@ class Hero:
 
 
 class Ai:
-    def __init__(self, canvas):
+    def __init__(self, canvas,ti):
         self.x = random.randint(250, 350)
         self.y = random.randint(450, 600)
         self.canvas = canvas
         self.endgame = False
         self.radius = 15
         self.speed = 10
+        self.ti=ti
         self.direction = random.randint(-180,180)
-        self.ai = canvas.create_oval(self.x - self.radius, self.y - self.radius, self.x + self.radius,self.y + self.radius, fill=random.choice(color))
+        self.ai = canvas.create_oval(self.x - self.radius, self.y - self.radius, self.x + self.radius,self.y + self.radius, fill=random.choice(color),tag='e' + str(ti))
         self.canvas_height = self.canvas.winfo_height()
         self.canvas_width = self.canvas.winfo_width()
     def coords(self):
@@ -130,6 +150,8 @@ class Ai:
         sx = self.speed * math.cos(self.direction)
         sy = self.speed * math.sin(self.direction)
         self.canvas.move(self.ai, sx, sy)
+        root.update()
+        canvas.update()
     def collisionDetection(self):
         for f in range(len(foodList)):
             try:
@@ -150,8 +172,15 @@ class Ai:
                     root.update()
             except:
                 pass
+ti = 0
 
-
+def spawn_enimy(numOfenimy):
+    for i in range(numOfenimy):
+        global c
+        global ti
+        ti += 1
+        c = Ai(canvas, ti)
+        eList.append(c)
 
 # vew
 canvas = Canvas(root, width=750, height=750)
@@ -172,27 +201,17 @@ def create_grid(event=None):
 canvas.bind('<Configure>', create_grid)
 
 player = Hero(canvas)
-player2 = Ai(canvas)
-player3 = Ai(canvas)
-player4 = Ai(canvas)
-player5 = Ai(canvas)
+
 
 player.mouseCoords()
-
+spawn_enimy(5)
 spawn_cells(100)
+
 while player.endgame == False:
     try:
         player.moveTowardMouse()
         player.mouseCoords()
-        player2.moveTowardRandom()
-        player3.moveTowardRandom()
-        player4.moveTowardRandom()
-        player5.moveTowardRandom()
         player.collisionDetection()
-        player2.collisionDetection()
-        player3.collisionDetection()
-        player4.collisionDetection()
-        player5.collisionDetection()
         root.update_idletasks()
         root.update()
         time.sleep(.005)
